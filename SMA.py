@@ -14,6 +14,7 @@ class SMAST(bt.Strategy):
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
+        self.datahigh = self.datas[0].high
 
         # To keep track of pending orders
         self.order = None
@@ -25,11 +26,16 @@ class SMAST(bt.Strategy):
         self.min_for_buy = None
         self.prev_resistens = None
 
+        self.high_count = []
+        self.stop_lose = None
+
         self.sma1 = bt.indicators.SMA(period=200)
         self.sma2 = bt.indicators.SMA(period=50)
         # self.sma1.plotinfo.plot = False
         # self.sma2.plotinfo.plot = False
-        self.pp = bt.indicators.PivotPoint(self.data1)
+        self.pp = bt.indicators.PivotPoint(self.data1,_autoplot=False)
+        self.pp1 = bt.indicators.PivotPoint(self.data2)
+
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -57,27 +63,36 @@ class SMAST(bt.Strategy):
         if self.order:
             return
 
-        if not self.position:
-            if (self.dataclose[0] < self.sma1):  # меньше 200
-                if (self.dataclose[0] > self.sma2) and (self.dataclose[-1] < self.sma2):  # отскок и больше 50
-                    if (self.dataclose[0] > self.pp.lines.s2):  # не пробило дно
-                        self.order = self.sell()
-                        self.profit = self.dataclose[0]
-                        self.r1 = self.pp.lines.r1 + 0.0
-                        self.s2 = self.pp.lines.s2 + 0.0
+        in_middle = (self.dataclose[0] < self.sma1) and (
+                    self.dataclose[0] > self.sma2)  # меньше SMA(200) и больше SMA(50)
+        if in_middle and len(self.high_count) <= 5:
+            self.high_count.append(self.datahigh + 0.0)
+        else:
+            self.high_count = []
 
+        if not self.position:
+            print(self.high_count)
+            if (self.dataclose[0] < self.sma2) and (len(self.high_count) > 0):  # return in < SMA(50)
+                self.order = self.sell()
+                self.profit = self.dataclose[0]
+                self.r1 = self.pp1.lines.r1 + 0.0
+                self.s2 = self.pp1.lines.s2 + 0.0
+                self.stop_lose = max(self.high_count)
+            else:
+                print(f' sma = {self.sma2 + 0.0} high-count = {len(self.high_count)}')
         else:
 
-            if not (self.r1 == self.pp.lines.r1):  # next resistens level
+            if (self.dataclose[0] >= self.stop_lose):
+                self.order = self.close()
+                if not (self.r1 == self.pp1.lines.r1):  # next resistens level
+                    if (self.dataclose[0] >= self.r1):  # close without profit
+                        self.order = self.close()
+                        self.log('Close without profit : %.2f' % self.dataclose[0])
+                        print(f'profit: {(self.dataclose[0] - self.profit) * - 1}')
+                        self.profit = None
 
-                if (self.dataclose[0] >= self.r1):  # close without profit
-                    self.order = self.close()
-                    self.log('Close without profit : %.2f' % self.dataclose[0])
-                    print(f'profit: {(self.dataclose[0] - self.profit) * - 1}')
-                    self.profit = None
-
-                if (self.dataclose[0] <= self.s2):  # close with profit
-                    self.order = self.close()
-                    self.log('Close with profit : %.2f' % self.dataclose[0])
-                    print(f'profit: {(self.dataclose[0] - self.profit) * - 1}')
-                    self.profit = None
+                    if (self.dataclose[0] <= self.s2):  # close with profit
+                        self.order = self.close()
+                        self.log('Close with profit : %.2f' % self.dataclose[0])
+                        print(f'profit: {(self.dataclose[0] - self.profit) * - 1}')
+                        self.profit = None
