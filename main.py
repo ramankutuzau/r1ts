@@ -9,8 +9,8 @@ import argparse
 import backtrader as bt
 import datetime
 import yfinance as yf
-
-import Points_SMA
+import Points_SMA,Data
+import Data
 import SMA
 import pullback
 
@@ -22,7 +22,7 @@ def runstrat():
     # Datas are in a subfolder of the samples. Need to find where the script is
     # because it could have been called from anywhere
     modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
-    datapath = os.path.join(modpath, 'USDJPY.csv')
+    datapath = os.path.join(modpath, 'GBPUSD_all.csv')
     data = bt.feeds.GenericCSVData(
         dataname=datapath,
         dtformat=('%Y%m%d'),
@@ -34,12 +34,14 @@ def runstrat():
         low=4,
         close=5,
         volume=6,
-        timeframe=bt.TimeFrame.Minutes,
-        # fromdate=datetime.datetime(2022, 4, 11),
-        # todate=datetime.datetime(2022, 4, 13)
+        # openterest=-1,
+        # timeframe=bt.TimeFrame.Minutes,
+        # fromdate=datetime.datetime(2022, 4, 1),
+        # todate=datetime.datetime(2022, 4, 5)
 
 
     )
+
 
     # data = bt.feeds.PandasData(dataname=yf.download('^DJI', '2019-04-13', '2022-04-13'))
     # data = bt.feeds.PandasData(dataname=yf.download('AAPL', '2019-04-13', '2022-04-13'))
@@ -63,9 +65,12 @@ def runstrat():
 
     # Run over everything
     cerebro.run()
+    # Points_SMA.Strategy.prediction(None,body=0.2,up=0.4,down=0.3)
+
     # Print out the final result
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
-    # cerebro.plot(style='bar')
+    cerebro.plot(style='bar')
+
 
 
 def parse_args():
@@ -88,3 +93,30 @@ def parse_args():
 
 if __name__ == '__main__':
     runstrat()
+    # data = Data.Processes().reade_txt()
+    #
+    # found_list = []
+    # print(data[12112])
+    #
+    # positive_list = []
+    # negative_list = []
+    #
+    # print(f'ищем эелемент {search_el} up {shadow_up} down {shadow_down} sma {sma} next {next}') # work
+    # print(len(data))
+
+    # Python3 code to demonstrate working of
+    # Convert String to Tuple
+    # using map() + tuple() + int + split()
+
+    # # initialize string
+    # test_str = "0.1, -5.2, 4.1, 6.1, 0.0"
+    #
+    # # printing original string
+    # print("The original string : " + str(test_str))
+    #
+    # # Convert String to Tuple
+    # # using map() + tuple() + int + split()
+    # res = tuple(map(float, test_str.split(', ')))
+    #
+    # # printing result
+    # print("Tuple after getting conversion from String : " + str(res))
