@@ -47,8 +47,10 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
         self.cash = 10
 
 
-        self.sma = bt.indicators.SMA(period=50)
+        self.sma = bt.indicators.SMA(period=30)
         self.sma2 = bt.indicators.SMA(period=200)
+        self.pp = bt.indicators.PivotPoint(self.data1)
+
 
 
     def notify_order(self, order):
@@ -86,19 +88,31 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
         # bar2 = (self.dataopen[-2], self.dataclose[-2], self.datahigh[-2], self.datalow[-2],self.sma[-2])
         # bar2 = self.calculate_bar(bar=bar2, type='percent',sma1=self.sma[-2])
 
+        bar3 = (self.dataopen[-3], self.dataclose[-3], self.datahigh[-3], self.datalow[-3], self.sma[-3])
+        bar3 = self.calculate_bar(bar=bar3, type='percent', sma1=self.sma[-3], sma2=self.sma2[-3],
+                                  r1=self.pp.lines.r1[-3],r2=self.pp.lines.r1[-3],
+                                  s1=self.pp.lines.s1[-3],s2=self.pp.lines.s2[-3])
+
         bar2 = (self.dataopen[-2], self.dataclose[-2], self.datahigh[-2], self.datalow[-2],self.sma[-2])
-        bar2 = self.calculate_bar(bar=bar2, type='percent',sma1=self.sma[0],sma2=self.sma2[-2])
+        bar2 = self.calculate_bar(bar=bar2, type='percent',sma1=self.sma[0],sma2=self.sma2[-2],
+                                  r1=self.pp.lines.r1[-2], r2=self.pp.lines.r1[-2],
+                                  s1=self.pp.lines.s1[-2], s2=self.pp.lines.s2[-2])
 
         bar1 = (self.dataopen[-1], self.dataclose[-1], self.datahigh[-1], self.datalow[-1], self.sma[-1])
-        bar1 = self.calculate_bar(bar=bar1, type='percent', sma1=self.sma[-1],sma2=self.sma2[-1])
+        bar1 = self.calculate_bar(bar=bar1, type='percent', sma1=self.sma[-1],sma2=self.sma2[-1],
+                                  r1=self.pp.lines.r1[-1], r2=self.pp.lines.r1[-1],
+                                  s1=self.pp.lines.s1[-1], s2=self.pp.lines.s2[-1])
 
         bar = (self.dataopen[0], self.dataclose[0], self.datahigh[0], self.datalow[0],self.sma[0])
-        bar = self.calculate_bar(bar=bar, type='percent',sma1=self.sma[0],sma2=self.sma2[0])
+        bar = self.calculate_bar(bar=bar, type='percent',sma1=self.sma[0],sma2=self.sma2[0],
+                                 r1=self.pp.lines.r1[0], r2=self.pp.lines.r1[0],
+                                 s1=self.pp.lines.s1[0], s2=self.pp.lines.s2[0])
 
-        self.data_collection(prev_bar=bar2,current_bar=bar1,result_bar=bar)
-        # Prediction_3body_sma.Strategy_SMA.check_one_bar(self,prev_bar=bar2, current_bar=bar1,result_bar=bar)
-        if (len(self.datas[0]) == 367298):    # КОЛХОЗ
-            Data.Processes(data=self.data)
+        self.data_collection(bar=bar,bar1=bar1,bar2=bar2,bar3=bar3)
+        if(len(self.datas[0]) > 200):
+            Prediction_3body_sma.Strategy_SMA.check_three_bars(self,bar=bar,bar1=bar1,bar2=bar2,bar3=bar3)
+        # if (len(self.datas[0]) == 306913):    # КОЛХОЗ
+        #     Data.Processes(data=self.data)
 
             # self.data_collection(body=prev_body_point, sma=1, next=curr_body_point)
         # prev_body_per = self.to_percent(data_up=self.dataclose[-1], data_down=self.dataopen[-1]) # bar +/-
@@ -272,22 +286,26 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
     #         # print(body)
     #     # print(f'стало {body}')
     #     return body
-    def data_collection(self,prev_bar,current_bar,result_bar):
+    def data_collection(self,bar,bar1,bar2,bar3):
         # print(f'{self.data} bar {}')
-        self.data.append((prev_bar,current_bar,result_bar))
+        self.data.append((bar3,bar2,bar1,bar))
         # print(self.data)
         # Prediction.Test.runstrat()
         # print(self.data)
         # self.count += 1
         # print(self.count)
 
-    def calculate_bar(self,bar,type,sma1,sma2):
+    def calculate_bar(self,bar,type,sma1,sma2,r1,r2,s1,s2):
         dataopen = bar[0]
         dataclose = bar[1]
         datahigh = bar[2]
         datalow = bar[3]
         sma_1 = sma1
         sma_2 = sma2
+        r_1 = r1 + 0.0
+        r_2 = r2 + 0.0
+        s_1 = s1 + 0.0
+        s_2 = s2 + 0.0
         # print(f'SMA {sma}')
         if (type == 'percent'):
             body = self.to_percent(data_up=dataclose, data_down=dataopen)  # bar +/-
@@ -303,13 +321,48 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
                 sma_2 = 0
 
 
+
+            if(dataclose >= r1 + 0.0):
+                # print(f'r1 {dataclose} >= {r1}')
+
+                r_1 = 1
+            else:
+                # print(f'r1 {dataclose} <= {r1}')
+                r_1 = 0
+
+            if (dataclose >= r2 + 0.0):
+                # print(f'r2 {dataclose} >= {r2}')
+                r_2 = 1
+            else:
+                # print(f'r2 {dataclose} <= {r2}')
+                r_2 = 0
+
+            if (dataclose <= s1 + 0.0):
+                # print(f's1 {dataclose} <= {s1}')
+
+                s_1 = 1
+            else:
+                # print(f's1 {dataclose} >= {s1}')
+
+                s_1 = 0
+
+            if (dataclose <= s2 + 0.0):
+                # print(f's2 {dataclose} <= {s2}')
+
+                s_2 = 1
+            else:
+                # print(f's2 {dataclose} >= {s2}')
+
+                s_2 = 0
+
+
         elif(type == 'points'):
             body = self.to_points(dataclose=dataclose, dataopen=dataopen)  # bar +/-
             shadows = self.calculate_shadows(body=body,dataopen=dataopen,dataclose=dataclose,
                                              datahigh=datahigh,datalow=datalow)
             # print(f'body {body}')
 
-        bar = (body,shadows[0],shadows[1],sma_1,sma_2)
+        bar = (body,shadows[0],shadows[1],sma_1,sma_2,r_1,r_2,s_1,s_2)
         return bar
 
     def calculate_shadows(self,body,dataopen,dataclose,datahigh,datalow):

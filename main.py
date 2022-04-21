@@ -22,9 +22,10 @@ def runstrat():
     # Datas are in a subfolder of the samples. Need to find where the script is
     # because it could have been called from anywhere
     modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
-    datapath = os.path.join(modpath, 'GBPUSD_all.csv')
+    datapath = os.path.join(modpath, 'GBPUSD_220418_220420.csv')
     data = bt.feeds.GenericCSVData(
         dataname=datapath,
+        timeframe=bt.TimeFrame.Minutes,
         dtformat=('%Y%m%d'),
         tmformat=('%H:%M:%S'),
         datetime=0,
@@ -42,7 +43,6 @@ def runstrat():
 
     )
 
-
     # data = bt.feeds.PandasData(dataname=yf.download('^DJI', '2019-04-13', '2022-04-13'))
     # data = bt.feeds.PandasData(dataname=yf.download('AAPL', '2019-04-13', '2022-04-13'))
     # data = bt.feeds.PandasData(dataname=yf.download('GC=F', '2019-04-13', '2022-04-13'))
@@ -51,14 +51,14 @@ def runstrat():
 
     args = parse_args()
 
-    # cerebro.resampledata(data, timeframe=bt.TimeFrame.Days,compression=1)
+    cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes,compression=240)
     # cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes,compression=240)
     # cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes,compression=240)
 
     cerebro.addstrategy(Points_SMA.Strategy)
 
     # Set our desired cash start
-    cerebro.broker.setcash(1000000000.0)
+    cerebro.broker.setcash(10000000.0)
 
     # Print out the starting conditions
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
