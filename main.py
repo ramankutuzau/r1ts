@@ -22,7 +22,7 @@ def runstrat():
     # Datas are in a subfolder of the samples. Need to find where the script is
     # because it could have been called from anywhere
     modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
-    datapath = os.path.join(modpath, 'GBPUSD_220418_220420.csv')
+    datapath = os.path.join(modpath, 'AUDSGD_210101_220421.csv')
     data = bt.feeds.GenericCSVData(
         dataname=datapath,
         timeframe=bt.TimeFrame.Minutes,
@@ -51,12 +51,11 @@ def runstrat():
 
     args = parse_args()
 
-    cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes,compression=240)
+    # cerebro.resampledata(data, timeframe=bt.TimeFrame.Days,compression=1)
     # cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes,compression=240)
     # cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes,compression=240)
 
     cerebro.addstrategy(Points_SMA.Strategy)
-
     # Set our desired cash start
     cerebro.broker.setcash(10000000.0)
 

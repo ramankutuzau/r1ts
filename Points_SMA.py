@@ -6,7 +6,9 @@ from math import floor
 import Data
 import Prediction_3body_sma
 import Prediction_SMA
-class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
+from patterns import inside_bar,outside_bar,pin_bar
+from calculate import convert_bar
+class Strategy(bt.Strategy):
 
 
     def log(self, txt, dt=None):
@@ -17,6 +19,7 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
 
     def __init__(self):
         self.data = []
+
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
@@ -25,31 +28,31 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
         # To keep track of pending orders
         self.order = None
 
-        self.shadow_up = None
-        self.shadow_down = None
-        self.shadow_up = None
-        self.shadow_up_points = None
+        # self.shadow_up = None
+        # self.shadow_down = None
+        # self.shadow_up = None
+        # self.shadow_up_points = None
+        #
+        # self.prev_body_per = None # bar +/-
+        # self.curr_body_per = None # bar +/-
+        #
+        # self.prev_body_point = None
+        # self.curr_body_point = None
 
-        self.prev_body_per = None # bar +/-
-        self.curr_body_per = None # bar +/-
-
-        self.prev_body_point = None
-        self.curr_body_point = None
-
-
-        self.win = 0
-        self.loss = 0
         self.count = 0
-        self.count_buy = 0
-        self.count_sell = 0
-        self.winloss = None
-        self.result = 0
-        self.cash = 10
+        # self.win = 0
+        # self.loss = 0
+        # self.count = 0
+        # self.count_buy = 0
+        # self.count_sell = 0
+        # self.winloss = None
+        # self.result = 0
+        # self.cash = 10
 
 
-        self.sma = bt.indicators.SMA(period=30)
-        self.sma2 = bt.indicators.SMA(period=200)
-        self.pp = bt.indicators.PivotPoint(self.data1)
+        # self.sma = bt.indicators.SMA(period=30)
+        # self.sma2 = bt.indicators.SMA(period=200)
+        # self.pp = bt.indicators.PivotPoint(self.data1)
 
 
 
@@ -58,12 +61,31 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
             return
         self.order = None
 
-    def next(self):
 
+    def next(self):
         if self.order:
             return
         self.count += 1
-        print(f'count: {self.count}')
+
+        # bar = convert_bar.bar_to_percent(open=self.dataopen[-1],close=self.dataclose[-1],high=self.datahigh[-1],low=self.datalow[-1])
+
+        check = inside_bar.check(open=self.dataopen[0],close=self.dataclose[0],high=self.datahigh[0],low=self.datalow[0],
+                         prev_open=self.dataopen[-1],prev_close=self.dataclose[-1],prev_high=self.datahigh[-1],prev_low=self.datalow[-1])
+
+        bar = convert_bar.bar_to_percent(open=self.dataopen[0], close=self.dataclose[0],
+                                         high=self.datahigh[0], low=self.datalow[0])
+
+        prev_bar = convert_bar.bar_to_percent(open=self.dataopen[-1], close=self.dataclose[-1],
+                                         high=self.datahigh[-1], low=self.datalow[-1])
+
+        check = outside_bar.check(bar=bar,prev_bar=prev_bar,dataclose_curr=self.dataclose[0],dataopen_prev=self.dataopen[-1])
+
+        if check == 2:
+            self.sell()
+        elif(check == 1):
+            self.buy()
+        # print(self.count)
+        # print(f'count: {self.count}')
         # profit = self.dataclose[-1] - self.dataopen[-1]
         # print(f'proft: {profit}')
         # if (self.dataclose[-1] <= self.dataclose[-2]):
@@ -88,32 +110,41 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
         # bar2 = (self.dataopen[-2], self.dataclose[-2], self.datahigh[-2], self.datalow[-2],self.sma[-2])
         # bar2 = self.calculate_bar(bar=bar2, type='percent',sma1=self.sma[-2])
 
-        bar3 = (self.dataopen[-3], self.dataclose[-3], self.datahigh[-3], self.datalow[-3], self.sma[-3])
-        bar3 = self.calculate_bar(bar=bar3, type='percent', sma1=self.sma[-3], sma2=self.sma2[-3],
-                                  r1=self.pp.lines.r1[-3],r2=self.pp.lines.r1[-3],
-                                  s1=self.pp.lines.s1[-3],s2=self.pp.lines.s2[-3])
+        # bar3 = (self.dataopen[-3], self.dataclose[-3], self.datahigh[-3], self.datalow[-3], self.sma[-3])
+        # bar3 = self.calculate_bar(bar=bar3, type='percent', sma1=self.sma[-3], sma2=self.sma2[-3],
+        #                           r1=self.pp.lines.r1[-3],r2=self.pp.lines.r1[-3],
+        #                           s1=self.pp.lines.s1[-3],s2=self.pp.lines.s2[-3])
+        #
+        # bar2 = (self.dataopen[-2], self.dataclose[-2], self.datahigh[-2], self.datalow[-2],self.sma[-2])
+        # bar2 = self.calculate_bar(bar=bar2, type='percent',sma1=self.sma[0],sma2=self.sma2[-2],
+        #                           r1=self.pp.lines.r1[-2], r2=self.pp.lines.r1[-2],
+        #                           s1=self.pp.lines.s1[-2], s2=self.pp.lines.s2[-2])
+        #
+        # bar1 = (self.dataopen[-1], self.dataclose[-1], self.datahigh[-1], self.datalow[-1], self.sma[-1])
+        # bar1 = self.calculate_bar(bar=bar1, type='percent', sma1=self.sma[-1],sma2=self.sma2[-1],
+        #                           r1=self.pp.lines.r1[-1], r2=self.pp.lines.r1[-1],
+        #                           s1=self.pp.lines.s1[-1], s2=self.pp.lines.s2[-1])
+        #        # bar = (self.dataopen[0], self.dataclose[0], self.datahigh[0], self.datalow[0],self.sma[0])
+        # bar = self.calculate_bar(bar=bar, type='percent',sma1=self.sma[0],sma2=self.sma2[0],
+        #                          r1=self.pp.lines.r1[0], r2=self.pp.lines.r1[0],
+        #                          s1=self.pp.lines.s1[0], s2=self.pp.lines.s2[0])
+        #
+        # Prediction_3body_sma.Strategy_SMA.check_gap(self,bar=self.dataopen[0],bar1=self.dataclose[-1])
 
-        bar2 = (self.dataopen[-2], self.dataclose[-2], self.datahigh[-2], self.datalow[-2],self.sma[-2])
-        bar2 = self.calculate_bar(bar=bar2, type='percent',sma1=self.sma[0],sma2=self.sma2[-2],
-                                  r1=self.pp.lines.r1[-2], r2=self.pp.lines.r1[-2],
-                                  s1=self.pp.lines.s1[-2], s2=self.pp.lines.s2[-2])
-
-        bar1 = (self.dataopen[-1], self.dataclose[-1], self.datahigh[-1], self.datalow[-1], self.sma[-1])
-        bar1 = self.calculate_bar(bar=bar1, type='percent', sma1=self.sma[-1],sma2=self.sma2[-1],
-                                  r1=self.pp.lines.r1[-1], r2=self.pp.lines.r1[-1],
-                                  s1=self.pp.lines.s1[-1], s2=self.pp.lines.s2[-1])
-
-        bar = (self.dataopen[0], self.dataclose[0], self.datahigh[0], self.datalow[0],self.sma[0])
-        bar = self.calculate_bar(bar=bar, type='percent',sma1=self.sma[0],sma2=self.sma2[0],
-                                 r1=self.pp.lines.r1[0], r2=self.pp.lines.r1[0],
-                                 s1=self.pp.lines.s1[0], s2=self.pp.lines.s2[0])
-
-        self.data_collection(bar=bar,bar1=bar1,bar2=bar2,bar3=bar3)
-        if(len(self.datas[0]) > 200):
-            Prediction_3body_sma.Strategy_SMA.check_three_bars(self,bar=bar,bar1=bar1,bar2=bar2,bar3=bar3)
+        # self.data_collection(bar=bar,bar1=bar1,bar2=bar2,bar3=bar3)
+        # if(len(self.datas[0]) > 200):
+        # Prediction_3body_sma.Strategy_SMA.check_three_bars(self,bar=bar,bar1=bar1,bar2=bar2,bar3=bar3)
         # if (len(self.datas[0]) == 306913):    # КОЛХОЗ
         #     Data.Processes(data=self.data)
-
+        # if (pin_bar.check(bar) == 2):
+        #     print('est')
+        #     self.log('BUY CREATE, %.2f' % self.dataclose[0])
+        #     self.buy()
+        #     print(bar)
+        #     if(self.dataclose[0] > self.dataclose[-1]):
+        #         print('+')
+        #     else:
+        #         print('-')
             # self.data_collection(body=prev_body_point, sma=1, next=curr_body_point)
         # prev_body_per = self.to_percent(data_up=self.dataclose[-1], data_down=self.dataopen[-1]) # bar +/-
         # curr_body_per = self.to_percent(data_up=self.dataclose[0], data_down=self.dataopen[0]) # bar +/-
@@ -229,9 +260,9 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
             # Prediction.Strategy.runstrat(data=self.data)
             # Prediction.Strategy.data_collection(self.data)
 
-    def to_points(self,dataclose,dataopen):
-        points = dataclose - dataopen
-        return int(points * 100000)
+    # def to_points(self,dataclose,dataopen):
+    #     points = dataclose - dataopen
+    #     return int(points * 100000)
 
     # def shadow_up_points(self,body,high,close,low,open):
     #     if (body > 0.0):  # SHADOWS in percent
@@ -243,9 +274,9 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
     #         # shadow_down = round(self.dataopen[-1] / 100 * shadow_down_points, 2) * -1
     #     return int(points * 100000)
 
-    def shadow_in_points(self,x,y):
-        points = x - y
-        return int(points * 100000)
+    # def shadow_in_points(self,x,y):
+    #     points = x - y
+    #     return int(points * 100000)
 
     # def shadow_in_percent(self,body,high,close,low,open): # SHADOWS in percent
     #     if (body > 0.0):
@@ -257,15 +288,15 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
     #         shadow = (open / 100 * points) * -1
     #     return round(shadow,2)
 
-    def to_percent(self,data_up,data_down):
-
-        # if(dataclose > dataopen):
-            # print(f'close {dataclose} open {dataopen}')
-            # print(f'open: {dataopen} close {dataclose}')
-        difference = data_up - data_down
-        percent = round(round(difference * 10000) / 100,2)
-            # print(f'raznica {difference}')
-            # print(f'raznica in percent {}')
+    # def to_percent(self,data_up,data_down):
+    #
+    #     # if(dataclose > dataopen):
+    #         # print(f'close {dataclose} open {dataopen}')
+    #         # print(f'open: {dataopen} close {dataclose}')
+    #     difference = data_up - data_down
+    #     percent = round(round(difference * 10000) / 100,2)
+    #         # print(f'raznica {difference}')
+    #         # print(f'raznica in percent {}')
         # else:
         #     difference = dataopen - dataclose
         #     body = round(difference * 1000) / 100 * -1
@@ -274,7 +305,7 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
             # print(f'raznica in percent {(round(difference * 1000) / 100) * -1}')
         # body = self.rounding_body(body=body)
         # print(f'dif: {difference}')
-        return percent
+        # return percent
 
 
     # def rounding_body(self, body):
@@ -286,97 +317,84 @@ class Strategy(bt.Strategy,Prediction_SMA.Strategy_SMA):
     #         # print(body)
     #     # print(f'стало {body}')
     #     return body
-    def data_collection(self,bar,bar1,bar2,bar3):
-        # print(f'{self.data} bar {}')
-        self.data.append((bar3,bar2,bar1,bar))
-        # print(self.data)
-        # Prediction.Test.runstrat()
-        # print(self.data)
-        # self.count += 1
-        # print(self.count)
-
-    def calculate_bar(self,bar,type,sma1,sma2,r1,r2,s1,s2):
-        dataopen = bar[0]
-        dataclose = bar[1]
-        datahigh = bar[2]
-        datalow = bar[3]
-        sma_1 = sma1
-        sma_2 = sma2
-        r_1 = r1 + 0.0
-        r_2 = r2 + 0.0
-        s_1 = s1 + 0.0
-        s_2 = s2 + 0.0
-        # print(f'SMA {sma}')
-        if (type == 'percent'):
-            body = self.to_percent(data_up=dataclose, data_down=dataopen)  # bar +/-
-            shadows = self.calculate_shadows(body=body,dataopen=dataopen,dataclose=dataclose,
-                                             datahigh=datahigh,datalow=datalow)
-            if(dataclose >= sma_1):
-                sma_1 = 1
-            else:
-                sma_1 = 0
-            if (dataclose >= sma_2):
-                sma_2 = 1
-            else:
-                sma_2 = 0
-
-
-
-            if(dataclose >= r1 + 0.0):
-                # print(f'r1 {dataclose} >= {r1}')
-
-                r_1 = 1
-            else:
-                # print(f'r1 {dataclose} <= {r1}')
-                r_1 = 0
-
-            if (dataclose >= r2 + 0.0):
-                # print(f'r2 {dataclose} >= {r2}')
-                r_2 = 1
-            else:
-                # print(f'r2 {dataclose} <= {r2}')
-                r_2 = 0
-
-            if (dataclose <= s1 + 0.0):
-                # print(f's1 {dataclose} <= {s1}')
-
-                s_1 = 1
-            else:
-                # print(f's1 {dataclose} >= {s1}')
-
-                s_1 = 0
-
-            if (dataclose <= s2 + 0.0):
-                # print(f's2 {dataclose} <= {s2}')
-
-                s_2 = 1
-            else:
-                # print(f's2 {dataclose} >= {s2}')
-
-                s_2 = 0
-
-
-        elif(type == 'points'):
-            body = self.to_points(dataclose=dataclose, dataopen=dataopen)  # bar +/-
-            shadows = self.calculate_shadows(body=body,dataopen=dataopen,dataclose=dataclose,
-                                             datahigh=datahigh,datalow=datalow)
-            # print(f'body {body}')
-
-        bar = (body,shadows[0],shadows[1],sma_1,sma_2,r_1,r_2,s_1,s_2)
-        return bar
-
-    def calculate_shadows(self,body,dataopen,dataclose,datahigh,datalow):
-        up = 0.0
-        down = 0.0
-        if (body > 0.0):
-            up = self.to_percent(datahigh,dataclose)
-            down = self.to_percent(dataopen,datalow) * -1
-        elif(body < 0.0):
-            up = self.to_percent(datahigh,dataopen)
-            down = self.to_percent(dataclose,datalow) * -1
-        elif(body == 0.0):
-            up = self.to_percent(datahigh,dataclose)
-            down = self.to_percent(dataopen,datalow) * -1
-
-        return (up,down)
+    # def data_collection(self,bar,bar1,bar2,bar3):
+    #     # print(f'{self.data} bar {}')
+    #     self.data.append((bar3,bar2,bar1,bar))
+    #     # print(self.data)
+    #     # Prediction.Test.runstrat()
+    #     # print(self.data)
+    #     # self.count += 1
+    #     # print(self.count)
+    #
+    # def calculate_bar(self,bar,type):
+    #     dataopen = bar[0]
+    #     dataclose = bar[1]
+    #     datahigh = bar[2]
+    #     datalow = bar[3]
+    #     # sma_1 = sma1
+    #     # sma_2 = sma2
+    #     # r_1 = r1 + 0.0
+    #     # r_2 = r2 + 0.0
+    #     # s_1 = s1 + 0.0
+    #     # s_2 = s2 + 0.0
+    #     if (type == 'percent'):
+    #         body = self.to_percent(data_up=dataclose, data_down=dataopen)  # bar +/-
+    #         shadows = self.calculate_shadows(body=body,dataopen=dataopen,dataclose=dataclose,
+    #                                          datahigh=datahigh,datalow=datalow)
+    #         # if(dataclose >= sma_1):
+    #         #     sma_1 = 1
+    #         # else:
+    #         #     sma_1 = 0
+    #         # if (dataclose >= sma_2):
+    #         #     sma_2 = 1
+    #         # else:
+    #         #     sma_2 = 0
+    #         #
+    #         #
+    #         #
+    #         # if(dataclose >= r1 + 0.0):
+    #         #     r_1 = 1
+    #         # else:
+    #         #     r_1 = 0
+    #         #
+    #         # if (dataclose >= r2 + 0.0):
+    #         #     r_2 = 1
+    #         # else:
+    #         #     r_2 = 0
+    #         #
+    #         # if (dataclose <= s1 + 0.0):
+    #         #     s_1 = 1
+    #         # else:
+    #         #     s_1 = 0
+    #         #
+    #         # if (dataclose <= s2 + 0.0):
+    #         #     s_2 = 1
+    #         # else:
+    #         #     s_2 = 0
+    #     #
+    #
+    #     elif(type == 'points'):
+    #         body = self.to_points(dataclose=dataclose, dataopen=dataopen)  # bar +/-
+    #         shadows = self.calculate_shadows(body=body,dataopen=dataopen,dataclose=dataclose,
+    #                                          datahigh=datahigh,datalow=datalow)
+    #         # print(f'body {body}')
+    #
+    #     # bar = (body,shadows[0],shadows[1],sma_1,sma_2,r_1,r_2,s_1,s_2)
+    #     bar = (body,shadows[0],shadows[1])
+    #     return bar
+    #
+    # def calculate_shadows(self,body,dataopen,dataclose,datahigh,datalow):
+    #     up = 0.0
+    #     down = 0.0
+    #     if (body > 0.0):
+    #         up = self.to_percent(datahigh,dataclose)
+    #         down = self.to_percent(dataopen,datalow) * -1
+    #     elif(body < 0.0):
+    #         up = self.to_percent(datahigh,dataopen)
+    #         down = self.to_percent(dataclose,datalow) * -1
+    #     elif(body == 0.0):
+    #         up = self.to_percent(datahigh,dataclose)
+    #         down = self.to_percent(dataopen,datalow) * -1
+    #
+    #     return (up,down)
 

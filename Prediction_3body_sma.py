@@ -16,6 +16,17 @@ class Strategy_SMA():
 
         # self.check_one_bar()
 
+    def check_gap(self,bar,bar1):
+        print('count')
+        if(bar > bar1):
+            difference = bar1 - bar
+            percent = round(round(difference * 10000) / 100, 4)
+            print(percent)
+            if(percent <= -0.02):
+                print('gap вниз')
+                print(f'{bar} < {bar1})')
+
+
     def check_three_bars(self,bar,bar1,bar2,bar3):
         data = Processes().reade_txt()
         # print(f'search: {search_bar})')
