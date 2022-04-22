@@ -1,6 +1,6 @@
 import aifc
 
-import Points_SMA
+import all_patterns
 from Data import Processes
 # import Points_SMA
 

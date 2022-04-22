@@ -6,19 +6,24 @@ from calculate import convert_bar
 # return 1 = вверх
 # return 2 = вниз
 
-def check(bar,prev_bar,dataclose_curr,dataopen_prev):
-    if(bar[0] < 0.0) and (prev_bar[0] > 0.0): # RED
-        if(bar[1] > prev_bar[1]) and (bar[1] >= 0.01): # максимум выше и 2 тени есть
-            if(bar[2] < prev_bar[2]) and (bar[1] <= 0.01): # минимум нижу и тень есть bar #2
-                if(dataclose_curr < dataopen_prev): # ниже/больше предыдущего
-                    # print(f'RED {bar} > {prev_bar}')
-                    return 2
-    elif(bar[0] > 0.0): # GREEN
-        if(bar[1] > prev_bar[1]) and (bar[1] >= 0.01): # максимум выше и 2 тени есть
-            if(bar[2] < prev_bar[2]) and (bar[1] <= 0.01): # минимум нижу и тень есть
-                if(bar[0]  > (prev_bar[0] * -1)): # выше/больше предыдущего
-                    if (dataclose_curr > dataopen_prev):  # ниже/больше предыдущего
-                        # print(f'GREEN {bar} > {prev_bar}')
-                        return 1
+def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low):
+
+    bar = convert_bar.bar_to_points(open=open,close=close,high=high,low=low)
+    prev_bar = convert_bar.bar_to_points(open=prev_open,close=prev_close,high=prev_high,low=prev_low)
+
+
+    if(bar[0] > 0) and (prev_bar[0] < 0): # GREEN
+        if(close > prev_open) and (open <= prev_close): # сама свеча должна быть больше ( поглощения )
+            if(bar[1] > 0) and (prev_bar[1] > 0): # верхние тени есть
+                if(bar[2] < 0) and (prev_bar[2] < 0): # нижние тени есть
+                    if(low < prev_low): # нижяя тень последего ниже предыдущего
+                        if(close > prev_open): # цена закрытие больше предыдущего открытие
+                            # print(f'outside_bar GREEN ')
+                            return 1
+                        # RED
+                        elif(close < prev_open):  # цена закрытие меньше предыдущего открытие
+                            # print(f'outside_bar RED ')
+                            return 2
+
     else:
         return 0
