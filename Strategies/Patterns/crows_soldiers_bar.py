@@ -1,6 +1,6 @@
 
 
-from calculate import convert_bar
+from Calculate import convert_bar
 # return 0 = не сработал
 # return 1 = вверх
 # return 2 = вниз
@@ -14,13 +14,13 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low,prev2_open
     if (close > prev_close):  # GREEN
         if(prev_close > prev2_close):
             if(prev2_bar[0] > 1):
-                # print(f'crows_soldiers_bar GREEN')
+                print(f'crows_soldiers_bar GREEN')
                 return 1
 
     elif (close < prev_close):  # last RED
         if(prev_close < prev2_close):
             if(prev2_bar [0] < -1):
-                # print(f'crows_soldiers_bar RED')
+                print(f'crows_soldiers_bar RED')
                 return 2
     else:
         return 0

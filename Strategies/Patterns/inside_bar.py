@@ -1,6 +1,6 @@
 
 
-from calculate import convert_bar
+from Calculate import convert_bar
 # return 0 = не сработал
 # return 1 = вверх
 # return 2 = вниз
@@ -16,7 +16,7 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low):
                     if (open >= prev_close):  # внутренний бар ниже/равен закрытию материнского
                         if (high <= prev_high):  # верхние шипы не выходят за шип материнского
                             if (low >= prev_low):  # нижний пиш не выходит за открытие материнского бара
-                                # print(f'inside_bar GREEN')
+                                print(f'inside_bar GREEN')
 
                                 return 1
     elif (bar[0] < 0):  # RED
@@ -26,7 +26,7 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low):
                     if (open <= prev_close):  # внутренний бар ниже/равен закрытию материнского
                         if (high <= prev_high):  # верхние шипы не выходят за шип материнского
                             if (low > prev_open):  # нижний пиш не выходит за открытие материнского бара
-                                # print(f'inside_bar RED')
+                                print(f'inside_bar RED')
                                 return 2
     else:
         return 0
