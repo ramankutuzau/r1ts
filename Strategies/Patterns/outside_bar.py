@@ -18,11 +18,13 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low):
                 if(bar[2] < 0) and (prev_bar[2] < 0): # нижние тени есть
                     if(low < prev_low): # нижяя тень последего ниже предыдущего
                         if(close > prev_open): # цена закрытие больше предыдущего открытие
-                            print(f'outside_bar GREEN ')
+
+                            # print(f'outside_bar GREEN ')
                             return 1
                         # RED
                         elif(close < prev_open):  # цена закрытие меньше предыдущего открытие
-                            print(f'outside_bar RED ')
+
+                            # print(f'outside_bar RED ')
                             return 2
 
     else:

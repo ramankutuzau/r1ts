@@ -19,13 +19,15 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low,prev2_open
     # вернулся GREEN ( BUY ) значит на падение
     if(result == 1):
         if (high >= prev2_high):  # максимум третьего выше первого ( материнского )
-            print(f'fake_bar RED')
+            # print(f'fake_bar RED')
+
             return 2
     #  вернулся RED ( SELL ) значит на РОСТ
     elif(result == 2):
         if(open <= prev2_close): # третий бар меньше первого
             if(low < prev2_low): # минимум первого меньшетретьего ( материнского )
-                print(f'fake_bar GREEN')
+
+                # print(f'fake_bar GREEN')
                 return 1
     else:
         return 0

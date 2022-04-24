@@ -15,12 +15,14 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low):
     if(bar[0] > 0.1): # GREEN
         if(prev_bar[0] < 0.1):
             if(bar[0] / 100 * 80 <= abs(prev_bar[0])) and (bar[0] / 100 * 120 >= abs(prev_bar[0])):
-                print('rails_bar GREEN')
+
+                # print('rails_bar GREEN')
                 return 1
     elif(bar[0] < -0.1):
         if(prev_bar[0] > 0.1):
             if(abs(bar[0]) / 100 * 80 <= prev_bar[0]) and (abs(bar[0]) / 100 * 120 >= prev_bar[0]):
-                print('rails_bar RED')
+
+                # print('rails_bar RED')
                 return 2
 
     else:

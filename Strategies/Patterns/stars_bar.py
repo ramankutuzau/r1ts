@@ -15,14 +15,16 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low,prev2_open
         if(abs(prev_bar[0]) < abs(bar[0])): # средний бар меньше последнего
             if(close < prev2_open): # последний бар меньше материнского
                 if((bar[0] * 2 ) <= abs(prev2_bar[0])): # в 2 раза меньше материнской свечи
-                    print(f'stars_bar GREEN')
+
+                    # print(f'stars_bar GREEN')
                     return 1
 
     elif (bar[0] < 0):  # last RED
         if(abs(prev_bar[0]) < abs(bar[0])): # средний бар меньше последнего
             if(close > prev2_open): # последний бар меньше материнского
                 if (abs(bar[0] * 2) <= prev2_bar[0]):  # в 2 раза меньше материнской свечи
-                    print(f'stars_bar RED')
+
+                    # print(f'stars_bar RED')
                     return 2
 
 

@@ -20,7 +20,7 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low):
             if (abs(prev_bar_percent[2]) > (abs(prev_bar_percent[0]) * 2)):  # нижняя тень больше бара в 3 раза ( предыдущего )
                 if (abs(prev_bar_percent[2]) > (prev_bar_percent[1] * 2)):  # нижняя тень больше верхней в 3 раза
                     if(abs(prev_bar_percent[0]) >= min) and (abs(prev_bar_percent[0]) <= max): # бары почти одинаковые
-                        print('tweezers_bar GREEN')
+                        # print('tweezers_bar GREEN')
                         return 1
     # RED
     elif (bar_percent[1] > (abs(bar_percent[0]) * 3) ): # верхняя тень больше бара в 3 раза
@@ -28,7 +28,7 @@ def check(open,close,high,low,prev_open,prev_close,prev_high,prev_low):
             if (prev_bar_percent[1] > (abs(prev_bar_percent[0]) * 2)):  # верхняя тень больше бара в 3 раза ( предыдущего )
                 if (prev_bar_percent[1] > (abs(prev_bar_percent[2]) * 2)):  # верхняя тень больше нижней в 3 раза
                     if(abs(prev_bar_percent[0]) >= min) and (abs(prev_bar_percent[0]) <= max): # бары почти одинаковые
-                        print('tweezers_bar RED')
+                        # print('tweezers_bar RED')
                         return 2
     else:
         return 0
