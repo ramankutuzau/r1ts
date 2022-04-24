@@ -8,10 +8,7 @@ from Strategies import all_patterns
 from Statistics import forex,crypto
 
 def get_info_forex(from_symbol, to_symbol, interval):
-    # API_KEY = '7ZXC22A6A7LK4WZS'
-    # API_KEY = 'PHPGFSRYP629VYHN'
-    API_KEY = 'QASET7JJD5Y9ND47'
-    API_KEY = 'DMQJO0R9G5FRZK0M'
+    API_KEY = 'J4XBC80BE4NW1LNB'
 
     url = f"https://www.alphavantage.co/query?" \
           f"function=FX_INTRADAY&" \
