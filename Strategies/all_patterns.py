@@ -54,7 +54,9 @@ class Strategy(bt.Strategy):
         self.current_datetime = datetime.datetime.now()
 
         # if ( self.curdtime.strftime(timeframe) == self.current_datetime.strftime('2022-04-08 14:00:00') ):
-        if ( self.curdtime.strftime(timeframe) == self.current_datetime - datetime.timedelta(hours=2) ):
+        self.current_datetime = self.current_datetime - datetime.timedelta(hours=2)
+        if ( self.curdtime.strftime(timeframe) == self.current_datetime.strftime("%Y-%m-%d %H:00:00")):
+            print('check current')
             self.check_patterns_current(variant='current')
 
         # self.count += 1
@@ -267,20 +269,20 @@ class Strategy(bt.Strategy):
                         str_temp = line.replace(f'{name}:', '')  # deleted bar
                         res = tuple(map(int, str_temp.split(',')))  # convert to tuple
 
-            log = open(f'logs/logs_forex', 'a')
-            prediction = open(f'logs/prediction_forex', 'a')
-            dataname = self.getdatanames()
-            if (result == 2):
-                log.write(f'\n{dataname[0]} {self.curdtime + datetime.timedelta(hours=2)}\n {name}: SELL statistic: {res[0]}/{res[1]} winrate: {res[2]} \n')
-                prediction.write(f'{dataname[0]}.csv {self.curdtime + datetime.timedelta(hours=2)} sell\n')
+                        log = open(f'logs/logs_forex', 'a')
+                        prediction = open(f'logs/prediction_forex', 'a')
+                        dataname = self.getdatanames()
+                        if (result == 2):
+                            log.write(f'\n{dataname[0]} {self.curdtime + datetime.timedelta(hours=2)}\n {name}: SELL statistic: {res[0]}/{res[1]} winrate: {res[2]} \n')
+                            prediction.write(f'{dataname[0]}.csv {self.curdtime + datetime.timedelta(hours=2)} sell\n')
 
-            elif (result == 1):
-                log.write(f'\n{dataname[0]} {self.curdtime + datetime.timedelta(hours=2)}\n {name}: BUY statistic: {res[0]}/{res[1]} winrate: {res[2]} \n')
-                prediction.write(f'{dataname[0]}.csv {self.curdtime + datetime.timedelta(hours=2)} buy\n')
+                        elif (result == 1):
+                            log.write(f'\n{dataname[0]} {self.curdtime + datetime.timedelta(hours=2)}\n {name}: BUY statistic: {res[0]}/{res[1]} winrate: {res[2]} \n')
+                            prediction.write(f'{dataname[0]}.csv {self.curdtime + datetime.timedelta(hours=2)} buy\n')
 
-            prediction.close()
-            log.close()
-            file_curr.close()
+                # prediction.close()
+                # log.close()
+                # file_curr.close()
 
         elif(variant == 'history'):
 
