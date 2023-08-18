@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 import io
 from time import sleep
-bot = telebot.TeleBot("5127536244:AAGEANC9SB3BQlPRnO9yp8xgklLKCnzP12k")
+bot = telebot.TeleBot("")
 
 @bot.message_handler(commands=['help'])
 def signal(message):
